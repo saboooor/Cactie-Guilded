@@ -1,19 +1,20 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('@discordjs/builders');
-const { ButtonStyle } = require('discord.js');
-const { left, right } = require('../../lang/int/emoji.json');
+const { Embed } = require('guilded.js');
 const YAML = require('yaml');
 const fs = require('fs');
 const createField = require('./createField.js');
 const evalField = require('./evalField.js');
+const regex = /\[([^[]+)\](\((.*)\))/g;
 module.exports = async function analyzeTimings(message, client, args) {
-	const TimingsEmbed = new EmbedBuilder()
+	const TimingsEmbed = new Embed()
 		.setDescription('These are not magic values. Many of these settings have real consequences on your server\'s mechanics. See [this guide](https://eternity.community/index.php/paper-optimization/) for detailed information on the functionality of each setting.')
-		.setFooter({ text: `Requested by ${(message.author ?? message.member.user).tag}`, iconURL: (message.author ?? message.member.user).avatarURL() });
+		.setFooter(`Requested by ${message.member.user.name}`, message.member.user.avatar);
 
 	let url;
 	const fields = [];
 
 	args.forEach(arg => {
+		const matches = [...arg.matchAll(regex)];
+		arg = matches ? matches[0][1] : arg;
 		if (arg.startsWith('https://timin') && arg.includes('?id=')) url = arg.replace('/d=', '/?id=').split('#')[0].split('\n')[0];
 		if (arg.startsWith('https://www.spigotmc.org/go/timings?url=') || arg.startsWith('https://spigotmc.org/go/timings?url=')) {
 			TimingsEmbed.addFields([{ name: '❌ Spigot', value: 'Spigot timings have limited information. Switch to [Purpur](https://purpurmc.org) for better timings analysis. All your plugins will be compatible, and if you don\'t like it, you can easily switch back.' }])
@@ -24,7 +25,7 @@ module.exports = async function analyzeTimings(message, client, args) {
 
 	if (!url) return [{ content: 'Invalid URL' }];
 
-	client.logger.info(`Timings analyzed from ${message.member.user.tag} (${message.member.user.id}): ${url}`);
+	client.logger.info(`Timings analyzed from ${message.member.user.name} (${message.member.user.id}): ${url}`);
 
 	const timings_host = url.split('?id=')[0];
 	const timings_id = url.split('?id=')[1];
@@ -38,7 +39,7 @@ module.exports = async function analyzeTimings(message, client, args) {
 	const request = await response_json.json();
 
 	const server_icon = timings_host + 'image.php?id=' + request_raw.icon;
-	TimingsEmbed.setAuthor({ name: 'Timings Analysis', iconURL: server_icon, url: url });
+	TimingsEmbed.setAuthor('Timings Analysis', server_icon, url);
 
 	if (!request_raw || !request) {
 		TimingsEmbed.addFields([{ name: '❌ Invalid report', value: 'Create a new timings report.', inline: true }]);
@@ -244,29 +245,8 @@ module.exports = async function analyzeTimings(message, client, args) {
 		TimingsEmbed.addFields([{ name: '✅ All good', value: 'Analyzed with no recommendations.' }]);
 		return [{ embeds: [TimingsEmbed] }];
 	}
-	const components = [];
 	const issues = [...fields];
-	if (issues.length >= 13) {
-		fields.splice(12, issues.length, { name: `Plus ${issues.length - 12} more recommendations`, value: client.type.name == 'guilded' ? 'Do the recommendations listed on this page and do the command again to see more' : 'Click the buttons below to see more' });
-		TimingsEmbed.setFooter({ text: `Requested by ${(message.author ?? message.member.user).tag} • Page 1 of ${Math.ceil(issues.length / 12)}`, iconURL: (message.author ?? message.member.user).avatarURL() });
-		components.push(
-			new ActionRowBuilder()
-				.addComponents([
-					new ButtonBuilder()
-						.setCustomId('timings_prev')
-						.setEmoji({ id: left })
-						.setStyle(ButtonStyle.Secondary),
-					new ButtonBuilder()
-						.setCustomId('timings_next')
-						.setEmoji({ id: right })
-						.setStyle(ButtonStyle.Secondary),
-					new ButtonBuilder()
-						.setURL('https://github.com/pemigrade/botflop')
-						.setLabel('Botflop')
-						.setStyle(ButtonStyle.Link),
-				]),
-		);
-	}
+	if (issues.length >= 13) fields.splice(12, issues.length, { name: `Plus ${issues.length - 12} more recommendations`, value: 'Do the recommendations listed on this page and do the command again to see more' });
 	TimingsEmbed.addFields(fields);
-	return [{ embeds: [TimingsEmbed], components: components }, issues];
+	return [{ embeds: [TimingsEmbed] }, issues];
 };

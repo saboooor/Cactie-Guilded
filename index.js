@@ -1,51 +1,13 @@
 const fs = require('fs');
 const YAML = require('yaml');
-const G = require('guilded.js');
-const D = require('discord.js');
-
-// Create Discord client
-const discord = new D.Client({
-	shards: 'auto',
-	partials: [
-		D.Partials.Message,
-		D.Partials.Channel,
-		D.Partials.Reaction,
-		D.Partials.GuildMember,
-		D.Partials.User,
-	],
-	intents: [
-		D.GatewayIntentBits.Guilds,
-		D.GatewayIntentBits.GuildMessages,
-		D.GatewayIntentBits.GuildMembers,
-		D.GatewayIntentBits.GuildBans,
-		D.GatewayIntentBits.GuildPresences,
-		D.GatewayIntentBits.GuildMessageReactions,
-		D.GatewayIntentBits.DirectMessages,
-		D.GatewayIntentBits.GuildVoiceStates,
-		D.GatewayIntentBits.MessageContent,
-	],
-	allowedMentions: {
-		parse: ['users', 'roles', 'everyone'],
-		repliedUser: false,
-	},
-});
-
-// Set type for later use and startTimestamp for ready counter
-discord.type = { color: '\u001b[34m', name: 'discord' };
-discord.startTimestamp = Date.now();
-
-// Load the universal and discord-specific handlers
-for (const handler of fs.readdirSync('./handlers/universal').filter(file => file.endsWith('.js'))) require(`./handlers/universal/${handler}`)(discord);
-for (const handler of fs.readdirSync('./handlers/discord').filter(file => file.endsWith('.js'))) require(`./handlers/discord/${handler}`)(discord);
+const { Client } = require('guilded.js');
 
 // Load the config and login the guilded client
-const { con } = YAML.parse(fs.readFileSync('./config.yml', 'utf8'));
-const guilded = new G.Client({ token: con.guilded.token });
+const { token } = YAML.parse(fs.readFileSync('./config.yml', 'utf8'));
+const client = new Client({ token });
 
 // Set type for later use and startTimestamp for ready counter
-guilded.type = { color: '\u001b[33m', name: 'guilded' };
-guilded.startTimestamp = Date.now();
+client.startTimestamp = Date.now();
 
 // Load the universal and guilded-specific handlers
-for (const handler of fs.readdirSync('./handlers/universal').filter(file => file.endsWith('.js'))) require(`./handlers/universal/${handler}`)(guilded);
-for (const handler of fs.readdirSync('./handlers/guilded').filter(file => file.endsWith('.js'))) require(`./handlers/guilded/${handler}`)(guilded);
+for (const handler of fs.readdirSync('./handlers').filter(file => file.endsWith('.js'))) require(`./handlers/${handler}`)(client);

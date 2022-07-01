@@ -5,6 +5,7 @@
         "set": "Sua linguagem pessoal foi selecionada para Português!",
         "invalid": "**Linguagem inválida!**\nPor favor use uma linguagem da lista abaixo:"
     },
+    "pong": "Pong!",
     "prefix": "**Meu prefixo é `{pfx}`**\nSe meus comandos não funcionarem:\n- tente usar barra comandos (/)\n- Use minha menção como um prefixo ({usr})",
     "off": "Desligado",
     "on": "Ligado",

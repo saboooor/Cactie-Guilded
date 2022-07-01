@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { Embed } = require('guilded.js');
 const { nsfw } = require('../lang/int/emoji.json');
 module.exports = async function redditFetch(subreddits, message, client, attempts) {
 	if (!attempts) attempts = 1;
@@ -21,28 +21,17 @@ module.exports = async function redditFetch(subreddits, message, client, attempt
 	if (data.selftext) return redditFetch(subreddits, message, client, attempts + 1);
 	client.logger.info(`Image URL: ${data.url}`);
 	if (!data.url.includes('i.redd.it') && !data.url.includes('v.redd.it') && !data.url.includes('i.imgur.com') && !data.url.includes('redgifs.com/watch/')) return redditFetch(subreddits, message, client, attempts + 1);
-	if (data.over_18 && client.type.name == 'discord' && !message.channel.nsfw) return message.react(nsfw).catch(err => client.error(err.stack, message));
-	if (data.over_18 && client.type.name == 'guilded' && (await client.channels.fetch(message.channelId)).name.toLowerCase() != 'nsfw') return client.error('The content on this command is NSFW!\nTo view this sensitive content:\n- Execute this command in a channel named \'NSFW\'\n- Create a channel named \'NSFW\'', message, true);
+	if (data.over_18 && (await client.channels.fetch(message.channelId)).name.toLowerCase() != 'nsfw') return client.error('The content on this command is NSFW!\nTo view this sensitive content:\n- Execute this command in a channel named \'NSFW\'\n- Create a channel named \'NSFW\'', message, true);
 	const timestamp = parseInt(`${data.created}` + '000');
-	const PostEmbed = new EmbedBuilder()
+	const PostEmbed = new Embed()
 		.setColor(Math.floor(Math.random() * 16777215))
-		.setAuthor({ name: `u/${data.author}`, url: `https://reddit.com/u/${data.author}` })
+		.setAuthor(`u/${data.author}`, null, `https://reddit.com/u/${data.author}`)
 		.setTitle(`${data.over_18 ? `<:nsfw:${nsfw}>  ` : ''}${data.title}`)
 		.setDescription(`**${data.ups} Upvotes** (${data.upvote_ratio * 100}%)`)
 		.setURL(`https://reddit.com${data.permalink}`)
-		.setFooter({ text: `Fetched from r/${data.subreddit}` })
+		.setFooter(`Fetched from r/${data.subreddit}`)
 		.setTimestamp(timestamp);
-	if (data.url.includes('redgifs.com/watch/')) {
-		if (client.type.name == 'guilded') return redditFetch(subreddits, message, client, attempts + 1);
-		const gif = await fetch(`https://api.redgifs.com/v2/gifs/${data.url.split('redgifs.com/watch/')[1]}`);
-		const gifData = await gif.json();
-		if (!gifData.gif || !gifData.gif.urls || !gifData.gif.urls.hd) return redditFetch(subreddits, message, client, attempts + 1);
-		data.url = gifData.gif.urls.hd;
-		client.logger.info(`Redgifs URL: ${data.url}`);
-		PostEmbed.setAuthor({ name: `u/${data.author} (redgifs: @${gifData.gif.userName})`, url: gifData.user.profileUrl.startsWith('http') ? gifData.user.profileUrl : null })
-			.setColor(parseInt(gifData.gif.avgColor.replace('#', '0x')))
-			.setURL(data.url);
-	}
+	if (data.url.includes('redgifs.com/watch/')) return redditFetch(subreddits, message, client, attempts + 1);
 	if (data.url.includes('v.redd.it')) data.url = `${data.url}/DASH_480.mp4?source=fallback`;
 	PostEmbed.setImage(data.url);
 	let files;
