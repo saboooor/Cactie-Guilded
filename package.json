@@ -13,7 +13,7 @@
   "author": "Saboor Bilal",
   "license": "MIT",
   "dependencies": {
-    "@discordjs/collection": "^0.7.0",
+    "@discordjs/collection": "^0.8.0",
     "eslint": "^8.18.0",
     "fs": "^0.0.1-security",
     "guilded.js": "^0.13.3",
