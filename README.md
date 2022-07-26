@@ -5,7 +5,7 @@
 
 This is source code for my public Guilded bot, Cactie.
 
-[![Guilded](https://guilded.nico.engineer/shields/vanity/cactie?style=flat)](https://guilded.gg/cactie)
+[![Guilded](https://shields.yoki-labs.xyz/shields/vanity/cactie?style=flat)](https://guilded.gg/cactie)
 [![CodeFactor](https://www.codefactor.io/repository/github/saboooor/cactie-guilded/badge/main)](https://www.codefactor.io/repository/github/saboooor/cactie-guilded/overview/main)
 ![Lines](https://tokei.rs/b1/github/saboooor/cactie-guilded)
 
