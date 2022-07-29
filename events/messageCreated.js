@@ -20,7 +20,7 @@ module.exports = async (client, message) => {
 		&& reaction.triggers.some(word => message.content.toLowerCase().includes(word))
 		&& (reaction.additionaltriggers ? reaction.additionaltriggers.some(word => message.content.toLowerCase().includes(word)) : true)) {
 			reaction.execute(message);
-			client.logger.info(`${message.member.user.name} triggered reaction: ${reaction.name}`);
+			logger.info(`${message.member.user.name} triggered reaction: ${reaction.name}`);
 		}
 	});
 
@@ -36,7 +36,7 @@ module.exports = async (client, message) => {
 		// If message has the bot's Id, reply with prefix
 		if (message.content.includes(`@${client.user.name}`)) {
 			const prefix = await message.reply({ content: `My prefix is \`${srvconfig.txtprefix ? srvconfig.txtprefix : srvconfig.prefix}\` You may also use my mention as a prefix.` });
-			setTimeout(() => { message.client.messages.delete(prefix.channelId, prefix.id).catch(err => client.logger.error(err.stack)); }, 10000);
+			setTimeout(() => { message.client.messages.delete(prefix.channelId, prefix.id).catch(err => logger.error(err.stack)); }, 10000);
 		}
 		return;
 	}
@@ -53,7 +53,7 @@ module.exports = async (client, message) => {
 		// If message has the bot's Id, reply with prefix
 		if (message.content.includes(`@${client.user.name}`)) {
 			const prefix = await message.reply({ content: `My prefix is \`${srvconfig.txtprefix ? srvconfig.txtprefix : srvconfig.prefix}\` You may also use my mention as a prefix.` });
-			setTimeout(() => { message.client.messages.delete(prefix.channelId, prefix.id).catch(err => client.logger.error(err.stack)); }, 10000);
+			setTimeout(() => { message.client.messages.delete(prefix.channelId, prefix.id).catch(err => logger.error(err.stack)); }, 10000);
 		}
 		return;
 	}
@@ -106,9 +106,9 @@ module.exports = async (client, message) => {
 
 	// execute the command
 	try {
-		client.logger.info(`${message.member.user.name} issued command: ${message.content}`);
+		logger.info(`${message.member.user.name} issued command: ${message.content}`);
 		command.execute(message, args, client, lang);
 	}
-	catch (err) { client.logger.error(err.stack); }
+	catch (err) { logger.error(err.stack); }
 
 };

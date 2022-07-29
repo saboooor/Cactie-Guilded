@@ -1,4 +1,3 @@
-function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 const { Embed } = require('guilded.js');
 const getTranscript = require('../../functions/getTranscript.js');
 
@@ -21,11 +20,11 @@ module.exports = {
 
 			// Fetch the messages and bulk delete them
 			const messages = await client.messages.fetchMany(message.channelId, { limit: args[0] });
-			messages.forEach(async (msg) => await msg.delete().catch(err => client.logger.warn(err)));
+			messages.forEach(async (msg) => await msg.delete().catch(err => logger.warn(err)));
 			const channel = await client.channels.fetch(message.channelId);
 
 			// log the action
-			client.logger.info(`Cleared ${messages.size} messages from #${channel.name}`);
+			logger.info(`Cleared ${messages.size} messages from #${channel.name}`);
 			const clearMsg = await message.reply({ content: `Cleared ${messages.size} messages!` });
 
 			// Check if log channel exists and send message

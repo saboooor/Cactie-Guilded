@@ -1,4 +1,3 @@
-function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 const { Embed } = require('guilded.js');
 const srvs = {};
 
@@ -19,7 +18,7 @@ module.exports = {
 				.setTitle('Boner');
 
 			// If current message exists, delete the old message
-			if (srvs[message.channelId] && srvs[message.channelId].msg) client.messages.delete(message.channelId, srvs[message.channelId].msg.id).catch(err => client.logger.warn(err));
+			if (srvs[message.channelId] && srvs[message.channelId].msg) client.messages.delete(message.channelId, srvs[message.channelId].msg.id).catch(err => logger.warn(err));
 
 			// Set the data with the fields and largest number for editing the message
 			srvs[message.channelId] = {
@@ -52,7 +51,7 @@ module.exports = {
 				ppEmbed.clearFields();
 				ppEmbed.addFields(srvs[message.channelId].fields);
 				shaft.push('=');
-				if (srvs[message.channelId].largestNumber == srvs[message.channelId].fields[i].number && srvs[message.channelId].msg) srvs[message.channelId].msg.edit({ embeds: [ppEmbed] }).catch(err => client.logger.warn(err));
+				if (srvs[message.channelId].largestNumber == srvs[message.channelId].fields[i].number && srvs[message.channelId].msg) srvs[message.channelId].msg.edit({ embeds: [ppEmbed] }).catch(err => logger.warn(err));
 			}
 			await sleep(500);
 
@@ -66,7 +65,7 @@ module.exports = {
 			// Set the field and edit
 			ppEmbed.clearFields();
 			ppEmbed.addFields(srvs[message.channelId].fields);
-			if (srvs[message.channelId].msg) srvs[message.channelId].msg.edit({ embeds: [ppEmbed] }).catch(err => client.logger.warn(err));
+			if (srvs[message.channelId].msg) srvs[message.channelId].msg.edit({ embeds: [ppEmbed] }).catch(err => logger.warn(err));
 
 			// Delete the data once all the fields are finished
 			if (srvs[message.channelId].largestNumber == srvs[message.channelId].fields[i].number) delete srvs[message.channelId];

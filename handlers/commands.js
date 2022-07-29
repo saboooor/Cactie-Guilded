@@ -19,5 +19,5 @@ module.exports = client => {
 			count++;
 		}
 	}
-	client.logger.info(`${count} text commands loaded`);
+	logger.info(`${count} text commands loaded`);
 };

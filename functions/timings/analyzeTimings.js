@@ -4,28 +4,38 @@ const fs = require('fs');
 const createField = require('./createField.js');
 const evalField = require('./evalField.js');
 const regex = /\[([^[]+)\](\((.*)\))/g;
+function componentToHex(c) {
+	const hex = c.toString(16);
+	return hex.length == 1 ? '0' + hex : hex;
+}
+
 module.exports = async function analyzeTimings(message, client, args) {
+	const author = message.member;
 	const TimingsEmbed = new Embed()
 		.setDescription('These are not magic values. Many of these settings have real consequences on your server\'s mechanics. See [this guide](https://eternity.community/index.php/paper-optimization/) for detailed information on the functionality of each setting.')
-		.setFooter(`Requested by ${message.member.user.name}`, message.member.user.avatar);
+		.setFooter(`Requested by ${author.user.name}`, author.user.avatar);
 
 	let url;
 	const fields = [];
 
-	args.forEach(arg => {
+	for (let arg of args) {
 		const matches = [...arg.matchAll(regex)];
 		arg = matches ? matches[0][1] : arg;
-		if (arg.startsWith('https://timin') && arg.includes('?id=')) url = arg.replace('/d=', '/?id=').split('#')[0].split('\n')[0];
+		if (arg.startsWith('https://spark.lucko.me')) {
+			TimingsEmbed.addFields([{ name: '⚠️ Spark Profile', value: 'This is a Spark Profile. Use /profile instead for this type of report.' }]);
+			return [{ embeds: [TimingsEmbed] }];
+		}
+		if (arg.startsWith('https://timin') && arg.includes('?id=')) url = arg.replace('/d=', '/?id=').replace('timin.gs', 'timings.aikar.co').split('#')[0].split('\n')[0];
 		if (arg.startsWith('https://www.spigotmc.org/go/timings?url=') || arg.startsWith('https://spigotmc.org/go/timings?url=')) {
 			TimingsEmbed.addFields([{ name: '❌ Spigot', value: 'Spigot timings have limited information. Switch to [Purpur](https://purpurmc.org) for better timings analysis. All your plugins will be compatible, and if you don\'t like it, you can easily switch back.' }])
 				.setURL(url);
 			return [{ embeds: [TimingsEmbed] }];
 		}
-	});
+	}
 
-	if (!url) return [{ content: 'Invalid URL' }];
+	if (!url) return [{ content: 'Invalid Timings URL' }];
 
-	client.logger.info(`Timings analyzed from ${message.member.user.name} (${message.member.user.id}): ${url}`);
+	logger.info(`Timings analyzed from ${author.user.name} (${author.id}): ${url}`);
 
 	const timings_host = url.split('?id=')[0];
 	const timings_id = url.split('?id=')[1];
@@ -38,8 +48,19 @@ module.exports = async function analyzeTimings(message, client, args) {
 	const response_json = await fetch(timings_json);
 	const request = await response_json.json();
 
+	if (!request_raw) {
+		TimingsEmbed.fields = ({
+			name: '❌ Processing Error',
+			value: 'The bot cannot process this timings report. Please use an alternative timings report.',
+			inline: true,
+		});
+		TimingsEmbed.setColor(parseInt('0xff0000'));
+		TimingsEmbed.setDescription('');
+		return [{ embeds: [TimingsEmbed] }];
+	}
+
 	const server_icon = timings_host + 'image.php?id=' + request_raw.icon;
-	TimingsEmbed.setAuthor('Timings Analysis', server_icon, url);
+	TimingsEmbed.setAuthor('Timings Analysis', server_icon ?? 'https://i.imgur.com/deE1oID.png', url);
 
 	if (!request_raw || !request) {
 		TimingsEmbed.addFields([{ name: '❌ Invalid report', value: 'Create a new timings report.', inline: true }]);
@@ -47,33 +68,43 @@ module.exports = async function analyzeTimings(message, client, args) {
 	}
 
 	let version = request.timingsMaster.version;
-	client.logger.info(version);
+	logger.info(version);
 
 	if (version.endsWith('(MC: 1.17)')) version = version.replace('(MC: 1.17)', '(MC: 1.17.0)');
 
+	let server_properties, bukkit, spigot, paper, pufferfish, purpur;
+
 	const plugins = Object.keys(request.timingsMaster.plugins).map(i => { return request.timingsMaster.plugins[i]; });
-	const server_properties = request.timingsMaster.config ? request.timingsMaster.config['server.properties'] : null;
-	const bukkit = request.timingsMaster.config ? request.timingsMaster.config.bukkit : null;
-	const spigot = request.timingsMaster.config ? request.timingsMaster.config.spigot : null;
-	const paper = request.timingsMaster.config ? (request.timingsMaster.config.paper ?? request.timingsMaster.config.paperspigot) : null;
-	const pufferfish = request.timingsMaster.config ? request.timingsMaster.config.pufferfish : null;
-	const purpur = request.timingsMaster.config ? request.timingsMaster.config.purpur : null;
+	const configs = request.timingsMaster.config;
+	if (configs) {
+		if (configs['server.properties']) server_properties = configs['server.properties'];
+		if (configs['bukkit']) bukkit = configs['bukkit'];
+		if (configs['spigot']) spigot = configs['spigot'];
+		if (configs['paper'] || configs['paperspigot']) paper = configs['paper'] ?? configs['paperspigot'];
+		if (configs['pufferfish']) pufferfish = configs['pufferfish'];
+		if (configs['purpur']) purpur = configs['purpur'];
+	}
 
 	const TIMINGS_CHECK = {
-		servers: await YAML.parse(fs.readFileSync('./lang/int/timings/servers.yml', 'utf8')),
+		servers: await YAML.parse(fs.readFileSync('./lang/int/analysis_config/servers.yml', 'utf8')),
 		plugins: {
-			paper: await YAML.parse(fs.readFileSync('./lang/int/timings/plugins/paper.yml', 'utf8')),
-			purpur: await YAML.parse(fs.readFileSync('./lang/int/timings/plugins/purpur.yml', 'utf8')),
+			paper: await YAML.parse(fs.readFileSync('./lang/int/analysis_config/plugins/paper.yml', 'utf8')),
+			purpur: await YAML.parse(fs.readFileSync('./lang/int/analysis_config/plugins/purpur.yml', 'utf8')),
 		},
 		config: {
-			'server.properties': await YAML.parse(fs.readFileSync('./lang/int/timings/config/server.properties.yml', 'utf8')),
-			bukkit: await YAML.parse(fs.readFileSync('./lang/int/timings/config/bukkit.yml', 'utf8')),
-			spigot: await YAML.parse(fs.readFileSync('./lang/int/timings/config/spigot.yml', 'utf8')),
-			paper: await YAML.parse(fs.readFileSync(`./lang/int/timings/config/paper-v${paper._version ? 28 : 27}.yml`, 'utf8')),
-			pufferfish: await YAML.parse(fs.readFileSync('./lang/int/timings/config/pufferfish.yml', 'utf8')),
-			purpur: await YAML.parse(fs.readFileSync('./lang/int/timings/config/purpur.yml', 'utf8')),
+			'server.properties': await YAML.parse(fs.readFileSync('./lang/int/analysis_config/server.properties.yml', 'utf8')),
+			bukkit: await YAML.parse(fs.readFileSync('./lang/int/analysis_config/bukkit.yml', 'utf8')),
+			spigot: await YAML.parse(fs.readFileSync('./lang/int/analysis_config/spigot.yml', 'utf8')),
+			paper: await YAML.parse(fs.readFileSync(`./lang/int/analysis_config/timings/paper-v${paper._version ? 28 : 27}.yml`, 'utf8')),
+			pufferfish: await YAML.parse(fs.readFileSync('./lang/int/analysis_config/timings/pufferfish.yml', 'utf8')),
+			purpur: await YAML.parse(fs.readFileSync('./lang/int/analysis_config/purpur.yml', 'utf8')),
 		},
 	};
+
+	const timing_cost = parseInt(request.timingsMaster.system.timingcost);
+	if (timing_cost > 300) {
+		fields.push({ name: '❌ Timingcost', value: `Your timingcost is ${timing_cost}. Your cpu is overloaded and/or slow. Find a [better host](https://www.birdflop.com).`, inline: true });
+	}
 
 	// fetch the latest mc version
 	const req = await fetch('https://api.purpurmc.org/v2/purpur');
@@ -91,9 +122,6 @@ module.exports = async function analyzeTimings(message, client, args) {
 			if (version.includes(server.name)) fields.push(createField(server));
 		});
 	}
-
-	const timing_cost = parseInt(request.timingsMaster.system.timingcost);
-	if (timing_cost > 300) fields.push({ name: '❌ Timingcost', value: `Your timingcost is ${timing_cost}. Your cpu is overloaded and/or slow. Find a [better host](https://www.birdflop.com).`, inline: true });
 
 	const flags = request.timingsMaster.system.flags;
 	const jvm_version = request.timingsMaster.system.jvmversion;
@@ -190,7 +218,7 @@ module.exports = async function analyzeTimings(message, client, args) {
 		Object.keys(TIMINGS_CHECK.config).map(i => { return TIMINGS_CHECK.config[i]; }).forEach(config => {
 			Object.keys(config).forEach(option_name => {
 				const option = config[option_name];
-				evalField(fields, option, option_name, plugins, server_properties, bukkit, spigot, paper, pufferfish, purpur, client);
+				evalField(fields, option, option_name, plugins, server_properties, bukkit, spigot, paper, pufferfish, purpur);
 			});
 		});
 	}
@@ -235,18 +263,14 @@ module.exports = async function analyzeTimings(message, client, args) {
 		green = 255;
 	}
 
-	function componentToHex(c) {
-		const hex = c.toString(16);
-		return hex.length == 1 ? '0' + hex : hex;
-	}
 	TimingsEmbed.setColor(parseInt('0x' + componentToHex(Math.round(red)) + componentToHex(Math.round(green)) + '00'));
 
 	if (fields.length == 0) {
 		TimingsEmbed.addFields([{ name: '✅ All good', value: 'Analyzed with no recommendations.' }]);
 		return [{ embeds: [TimingsEmbed] }];
 	}
-	const issues = [...fields];
-	if (issues.length >= 13) fields.splice(12, issues.length, { name: `Plus ${issues.length - 12} more recommendations`, value: 'Do the recommendations listed on this page and do the command again to see more' });
+	const suggestions = [...fields];
+	if (suggestions.length >= 13) fields.splice(12, suggestions.length, { name: `Plus ${suggestions.length - 12} more recommendations`, value: 'Do the recommendations listed on this page and do the command again to see more' });
 	TimingsEmbed.addFields(fields);
-	return [{ embeds: [TimingsEmbed] }, issues];
+	return [{ embeds: [TimingsEmbed] }, suggestions];
 };

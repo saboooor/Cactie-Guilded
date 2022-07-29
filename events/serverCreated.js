@@ -19,5 +19,5 @@ module.exports = async (client, member) => {
 	]);
 	if (guild.shortURL) srvEmbed.addFields([{ name: 'Vanity URL', value: `guilded.gg/${guild.shortURL}` }]);
 	client.messages.send('e1eb6361-e31d-43b9-afce-2c05ba4fb95e', { embeds: [srvEmbed] });
-	client.logger.info(`${client.user.name} has been added to ${member.serverId}`);
+	logger.info(`${client.user.name} has been added to ${member.serverId}`);
 };

@@ -11,7 +11,7 @@ module.exports = async function getTranscript(messages) {
 			msg[1].member = await msg[1].client.members.fetch(msg[1].serverId, msg[1].createdById)
 				.catch(err => {
 					unknownusers.push(msg[1].createdById);
-					msg[1].client.logger.warn(err);
+					msg[1].logger.warn(err);
 				});
 		}
 		const json = {

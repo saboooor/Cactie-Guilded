@@ -1,6 +1,6 @@
 {
   "name": "cactie-guilded",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Cactie Bot but guilded",
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
     "guilded.js": "^0.13.8",
     "hastebin": "^0.2.1",
     "mariadb": "^3.0.1",
+    "pbf": "^3.2.1",
     "winston": "^3.8.1",
     "yaml": "^2.1.1"
   }

@@ -14,5 +14,5 @@ module.exports = client => {
 		client.reactions.set(reaction.name, reaction);
 		count++;
 	}
-	client.logger.info(`${count} reactions loaded`);
+	logger.info(`${count} reactions loaded`);
 };
