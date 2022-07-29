@@ -1,4 +1,5 @@
 const { Embed } = require('guilded.js');
+
 module.exports = {
 	name: 'userinfo',
 	description: 'Guilded member information',

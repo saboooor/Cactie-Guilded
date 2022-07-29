@@ -1,4 +1,5 @@
 const analyzeTimings = require('../../functions/timings/analyzeTimings.js');
+
 module.exports = {
 	name: 'timings',
 	description: 'Analyze Paper timings to optimize the Paper server.',

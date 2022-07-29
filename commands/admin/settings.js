@@ -1,4 +1,5 @@
 const { Embed } = require('guilded.js');
+
 module.exports = {
 	name: 'settings',
 	description: 'Configure Cactie\'s settings in the server',

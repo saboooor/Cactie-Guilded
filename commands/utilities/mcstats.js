@@ -1,6 +1,7 @@
 const { Embed } = require('guilded.js');
 const { createPaste } = require('hastebin');
 const protocols = require('../../lang/int/mcprotocol.json');
+
 module.exports = {
 	name: 'mcstats',
 	description: 'Get the status of a Minecraft server',

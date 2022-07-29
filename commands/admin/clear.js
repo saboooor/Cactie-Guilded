@@ -1,6 +1,7 @@
 function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 const { Embed } = require('guilded.js');
 const getTranscript = require('../../functions/getTranscript.js');
+
 module.exports = {
 	name: 'clear',
 	description: 'Delete multiple messages at once',

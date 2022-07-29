@@ -1,4 +1,5 @@
 const { Embed } = require('guilded.js');
+
 module.exports = {
 	name: 'help',
 	description: 'Get help with Cactie',

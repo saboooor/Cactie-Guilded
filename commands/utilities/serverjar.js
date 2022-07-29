@@ -1,4 +1,5 @@
 const { Embed } = require('guilded.js');
+
 module.exports = {
 	name: 'serverjar',
 	aliases: ['mcjar', 'jar', 'srvjar'],

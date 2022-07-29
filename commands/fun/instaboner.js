@@ -1,4 +1,5 @@
 const { Embed } = require('guilded.js');
+
 module.exports = {
 	name: 'instaboner',
 	description: 'See your boner expand INSTANTLY!',

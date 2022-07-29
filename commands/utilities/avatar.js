@@ -1,4 +1,5 @@
 const { Embed } = require('guilded.js');
+
 module.exports = {
 	name: 'avatar',
 	description: 'Get the avatar of a user',

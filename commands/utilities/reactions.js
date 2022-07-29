@@ -1,4 +1,5 @@
 const { Embed } = require('guilded.js');
+
 module.exports = {
 	name: 'reactions',
 	description: 'See what words Cactie reacts to',

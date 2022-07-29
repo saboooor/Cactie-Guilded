@@ -1,6 +1,7 @@
 function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 const { Embed } = require('guilded.js');
 const srvs = {};
+
 module.exports = {
 	name: 'boner',
 	description: 'See your boner expand!',

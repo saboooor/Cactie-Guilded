@@ -1,4 +1,5 @@
 const { Embed } = require('guilded.js');
+
 module.exports = {
 	name: '8ball',
 	description: 'Let the 8 ball decide your fate!',
