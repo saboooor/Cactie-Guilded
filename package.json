@@ -1,10 +1,10 @@
 {
-  "name": "cactie",
-  "version": "420.69",
-  "description": "Cactie Bot woooo",
+  "name": "cactie-guilded",
+  "version": "0.5.0",
+  "description": "Cactie Bot but guilded",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/saboooor/Cactie.git"
+    "url": "git+https://github.com/saboooor/Cactie-Guilded.git"
   },
   "engines": {
     "node": ">=18.0.0"
