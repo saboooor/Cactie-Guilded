@@ -13,13 +13,13 @@
   "author": "Saboor Bilal",
   "license": "MIT",
   "dependencies": {
-    "@discordjs/collection": "^1.0.0",
-    "eslint": "^8.18.0",
+    "@discordjs/collection": "^1.0.1",
+    "eslint": "^8.20.0",
     "fs": "^0.0.1-security",
-    "guilded.js": "^0.13.3",
+    "guilded.js": "^0.13.8",
     "hastebin": "^0.2.1",
-    "mariadb": "^3.0.0",
-    "winston": "^3.8.0",
+    "mariadb": "^3.0.1",
+    "winston": "^3.8.1",
     "yaml": "^2.1.1"
   }
 }
